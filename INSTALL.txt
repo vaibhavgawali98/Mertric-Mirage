@@ -1,0 +1,49 @@
+METRIC MIRAGE UPGRADE: CSV / Excel upload
+==========================================
+
+HOW TO INSTALL
+1. Close the running app (Ctrl+C in the terminal).
+2. Unzip this archive. Copy the FOLDERS inside metric_mirage_upgrade/ into your project folder
+   (the one that contains app.py). Let your system MERGE the folders and REPLACE files when asked.
+   Your other files (the analysis engines in core/, the sql/ and reports/ folders, data/raw,
+   data/processed, requirements.txt) are NOT touched: nothing in them needed changing.
+3. In the project folder, with your virtual environment active:
+
+       pytest -v
+       streamlit run app.py
+
+4. In the app, open "Upload Data" in the sidebar and press "Try the sample file (simulated)".
+
+FILES TO REPLACE (they already exist in your project)
+    app.py
+    ui/logic.py
+    ui/state.py
+    ui/views/command_center.py
+    ui/views/contradiction.py
+    ui/views/cohorts.py
+    ui/views/integrity.py
+    ui/views/evidence_room.py
+    tests/test_app_smoke.py
+    .streamlit/config.toml
+
+NEW FILES
+    core/ingest.py               reading, cleaning, typing, date parsing, column mapping
+    data/sample_upload.py        the simulated sample file
+    ui/views/upload.py           the Upload Data page
+    tests/test_ingest.py         58 tests for the ingestion engine
+    tests/test_upload_flow.py    12 tests (logic, session state, real engines on uploaded data)
+    tests/test_upload_page.py    4 tests that drive the upload page with custom files
+    docs/UPLOAD_GUIDE.md         user guide, troubleshooting, README paragraph
+
+WHAT CHANGED IN THE EXISTING FILES (short)
+    app.py                 new "Upload Data" page; dataset list includes uploads; pages can request a
+                           dataset or page switch; the upload page works even if retail data is missing
+    ui/logic.py            DatasetInfo gets a "freq" field; upload helpers; wider ID-column detection
+    ui/state.py            uploads live in the session (never on disk); cohort results memoised per session
+    command_center.py      new overview for uploaded data (profile, cleaning report, mapping)
+    contradiction.py       matched windows for uploads; SQL panel shown for the retail dataset only
+    cohorts.py             guards for datasets with only one or two periods; per-tab error messages
+    integrity.py           change-point tab uses the uploaded dataset's period grain (month, quarter, year)
+    evidence_room.py       explains how to re-run findings that came from an uploaded file
+
+EXPECTED TEST COUNT: about 219 (143 before + 76 new). If any test fails, send me the full output.
